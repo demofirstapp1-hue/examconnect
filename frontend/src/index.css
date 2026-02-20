@@ -906,3 +906,59 @@ h4 { font-size: 1.125rem; }
   margin-bottom: 2rem;
   min-height: 40px;
 }
+/* --- RESPONSIVE LAYOUT ENGINE --- */
+
+/* Root variables to keep spacing consistent */
+:root {
+  --sb-width: 260px;
+  --sb-collapsed: 80px;
+  --mobile-header-h: 60px;
+}
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f8fafc; /* Adjust to your theme */
+}
+
+/* On Desktop: Sidebar sits on the left, Content on the right */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; 
+  transition: all 0.3s ease;
+}
+
+.content-inner {
+  padding: 2rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* MOBILE VIEW (Screens smaller than 768px) */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column; /* Stacks vertically */
+  }
+
+  .content-inner {
+    padding: 1rem;
+    margin-top: var(--mobile-header-h); /* Pushes content below mobile top bar */
+  }
+
+  /* Force tables or large grids to scroll instead of breaking the screen */
+  .content-inner {
+    overflow-x: hidden;
+  }
+}
+
+/* Dashboard Grid - This makes cards "fit" */
+.dashboard-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  width: 100%;
+}
