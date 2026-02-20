@@ -1,75 +1,89 @@
-import { useState, useEffect } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { motion } from 'framer-motion'
 import {
-    HiOutlineUsers, HiOutlineLogout, HiOutlinePlus, HiOutlineHome, 
-    HiChevronLeft, HiChevronRight, HiMenu, HiX 
-} from 'react-icons/hi';
+    HiOutlineAcademicCap, HiOutlineUsers, HiOutlineClipboardList,
+    HiOutlineChartBar, HiOutlineCog, HiOutlineLogout, HiOutlinePlus,
+    HiOutlineDocumentText, HiOutlineCheckCircle, HiOutlineHome
+} from 'react-icons/hi'
+
+const adminNav = [
+    { to: '/admin', icon: <HiOutlineHome />, label: 'Dashboard' },
+    { to: '/admin/users', icon: <HiOutlineUsers />, label: 'Manage Users' },
+    { to: '/admin/exams', icon: <HiOutlineClipboardList />, label: 'All Exams' },
+]
+
+const teacherNav = [
+    { to: '/teacher', icon: <HiOutlineHome />, label: 'Dashboard' },
+    { to: '/teacher/students', icon: <HiOutlineUsers />, label: 'Students' },
+    { to: '/teacher/create-exam', icon: <HiOutlinePlus />, label: 'Create Exam' },
+]
+
+const studentNav = [
+    { to: '/student', icon: <HiOutlineHome />, label: 'Dashboard' },
+    { to: '/student/results', icon: <HiOutlineChartBar />, label: 'My Results' },
+]
 
 export default function Sidebar() {
-    const { profile, signOut } = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [isCollapsed, setIsCollapsed] = useState(false);
-    const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const { profile, signOut } = useAuth()
+    const navigate = useNavigate()
 
-    // Close mobile sidebar on route change
-    useEffect(() => { setIsMobileOpen(false); }, [location]);
+    const navItems = profile?.role === 'admin' ? adminNav
+        : profile?.role === 'teacher' ? teacherNav
+            : studentNav
 
     const handleSignOut = async () => {
-        await signOut();
-        navigate('/login');
-    };
-
-    // Correctly mapped nav items based on your existing setup
-    const navItems = profile?.role === 'admin' 
-        ? [{ to: '/admin', icon: <HiOutlineHome />, label: 'Dashboard' }, { to: '/admin/users', icon: <HiOutlineUsers />, label: 'Users' }]
-        : profile?.role === 'teacher'
-        ? [{ to: '/teacher', icon: <HiOutlineHome />, label: 'Dashboard' }, { to: '/teacher/students', icon: <HiOutlineUsers />, label: 'Students' }, { to: '/teacher/create-exam', icon: <HiOutlinePlus />, label: 'Create' }]
-        : [{ to: '/student', icon: <HiOutlineHome />, label: 'Dashboard' }];
+        await signOut()
+        navigate('/login')
+    }
 
     return (
-        <>
-            {/* Mobile Header */}
-            <div className="mobile-header">
-                <button onClick={() => setIsMobileOpen(true)} className="menu-btn"><HiMenu size={24} /></button>
-                <span className="logo-text">ExamConnect</span>
+        <motion.aside
+            className="sidebar"
+            initial={{ x: -260 }}
+            animate={{ x: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 30 }}
+        >
+            {/* Logo */}
+            <div className="sidebar-logo">
+                <div className="logo-icon">E</div>
+                <span className="logo-text text-gradient">ExamConnect</span>
             </div>
 
-            {/* Mobile Overlay */}
-            <AnimatePresence>
-                {isMobileOpen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMobileOpen(false)} className="overlay" />}
-            </AnimatePresence>
+            {/* Navigation */}
+            <nav className="sidebar-nav">
+                <span className="nav-section-label">Navigation</span>
+                {navItems.map((item) => (
+                    <NavLink
+                        key={item.to}
+                        to={item.to}
+                        end={item.to.split('/').length <= 2}
+                        className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                    >
+                        <span className="nav-icon">{item.icon}</span>
+                        {item.label}
+                    </NavLink>
+                ))}
+            </nav>
 
-            <motion.aside 
-                className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobileOpen ? 'mobile-open' : ''}`}
-                animate={{ width: isCollapsed ? '80px' : '260px' }}
-            >
-                <button className="collapse-btn" onClick={() => setIsCollapsed(!isCollapsed)}>
-                    {isCollapsed ? <HiChevronRight /> : <HiChevronLeft />}
+            {/* User Info & Logout */}
+            <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: 'var(--space-md)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', padding: '0 0.5rem' }}>
+                    <div className="avatar">
+                        {profile?.name?.charAt(0)?.toUpperCase() || '?'}
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>{profile?.name || 'User'}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'capitalize' }}>
+                            {profile?.role || 'user'}
+                        </div>
+                    </div>
+                </div>
+                <button className="nav-item" onClick={handleSignOut}>
+                    <span className="nav-icon"><HiOutlineLogout /></span>
+                    Sign Out
                 </button>
-
-                <div className="sidebar-logo">
-                    <div className="logo-icon">E</div>
-                    {!isCollapsed && <span className="logo-text">ExamConnect</span>}
-                </div>
-
-                <nav className="nav-list">
-                    {navItems.map((item) => (
-                        <NavLink key={item.to} to={item.to} className="nav-item">
-                            <span className="icon">{item.icon}</span>
-                            {!isCollapsed && <span className="label">{item.label}</span>}
-                        </NavLink>
-                    ))}
-                </nav>
-
-                <div className="user-section">
-                    <div className="avatar">{profile?.name?.charAt(0).toUpperCase()}</div>
-                    {!isCollapsed && <span className="user-name">{profile?.name}</span>}
-                    <button onClick={handleSignOut} className="logout-btn"><HiOutlineLogout /></button>
-                </div>
-            </motion.aside>
-        </>
-    );
+            </div>
+        </motion.aside>
+    )
 }
