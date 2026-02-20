@@ -137,3 +137,20 @@ export default function AdminDashboard() {
         </DashboardLayout>
     )
 }
+import DashboardStats from '../../components/DashboardStats'
+import { HiOutlineUsers, HiOutlineBookOpen, HiOutlineClipboardCheck } from 'react-icons/hi'
+
+const adminStats = [
+    { label: 'Total Students', value: '1,250', icon: <HiOutlineUsers /> },
+    { label: 'Active Exams', value: '12', icon: <HiOutlineBookOpen /> },
+    { label: 'Completed', value: '450', icon: <HiOutlineClipboardCheck /> },
+]
+
+// Inside your Dashboard function:
+return (
+    <div className="dashboard-page">
+        <h1>Welcome back, Admin</h1>
+        <DashboardStats stats={adminStats} />
+        {/* Other dashboard content */}
+    </div>
+)
