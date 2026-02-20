@@ -1,9 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import { AnimatePresence } from 'framer-motion'
-import Sidebar from './components/Sidebar' // Make sure this path is correct
-
-// Import your pages (keeping your existing imports)
 import Login from './pages/Login'
 import Register from './pages/Register'
 import AdminDashboard from './pages/admin/Dashboard'
@@ -18,30 +15,17 @@ import StudentDashboard from './pages/student/Dashboard'
 import StudentTakeExam from './pages/student/TakeExam'
 import StudentResults from './pages/student/Results'
 
-/**
- * 1. THE LAYOUT COMPONENT
- * This wraps your dashboard pages to provide the Sidebar + Main Content area
- */
-function AppLayout({ children }) {
-    return (
-        <div className="app-container">
-            <Sidebar />
-            <main className="main-content">
-                <div className="content-inner">
-                    {children}
-                </div>
-            </main>
-        </div>
-    )
-}
-
-/**
- * 2. PROTECTED ROUTE COMPONENT
- */
 function ProtectedRoute({ children, allowedRoles }) {
     const { user, profile, loading } = useAuth()
 
-    if (loading) return <div className="loading-spinner">Loading...</div>
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+                <div className="skeleton" style={{ width: 40, height: 40, borderRadius: '50%' }} />
+            </div>
+        )
+    }
+
     if (!user) return <Navigate to="/login" replace />
 
     if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
@@ -52,13 +36,18 @@ function ProtectedRoute({ children, allowedRoles }) {
     return children
 }
 
-/**
- * 3. MAIN APP COMPONENT
- */
 export default function App() {
     const { user, profile, loading } = useAuth()
 
-    if (loading) return <div className="loading-screen">Loading ExamConnect...</div>
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', gap: 12 }}>
+                <div className="skeleton" style={{ width: 48, height: 48, borderRadius: 12 }} />
+                <span style={{ color: 'var(--text-muted)' }}>Loading ExamConnect...</span>
+            </div>
+        )
+    }
+
 
     const getHomeRoute = () => {
         if (!user || !profile) return '/login'
@@ -70,39 +59,47 @@ export default function App() {
     return (
         <AnimatePresence mode="wait">
             <Routes>
-                {/* PUBLIC ROUTES (No Sidebar) */}
+                {/* Public */}
                 <Route path="/login" element={user ? <Navigate to={getHomeRoute()} replace /> : <Login />} />
+
                 <Route path="/register" element={user ? <Navigate to={getHomeRoute()} replace /> : <Register />} />
 
-                {/* PROTECTED ROUTES (Wrapped in Layout with Sidebar) */}
-                <Route path="/*" element={
-                    <ProtectedRoute>
-                        <AppLayout>
-                            <Routes>
-                                {/* Admin */}
-                                <Route path="/admin" element={<AdminDashboard />} />
-                                <Route path="/admin/users" element={<AdminUsers />} />
-                                <Route path="/admin/exams" element={<AdminExams />} />
+                {/* Admin */}
 
-                                {/* Teacher */}
-                                <Route path="/teacher" element={<TeacherDashboard />} />
-                                <Route path="/teacher/students" element={<TeacherStudents />} />
-                                <Route path="/teacher/create-exam" element={<TeacherCreateExam />} />
-                                <Route path="/teacher/exams/:examId/answers" element={<TeacherReviewAnswers />} />
-                                <Route path="/teacher/exams/:examId/results" element={<TeacherResults />} />
+                <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
 
-                                {/* Student */}
-                                <Route path="/student" element={<StudentDashboard />} />
-                                <Route path="/student/exam/:examId" element={<StudentTakeExam />} />
-                                <Route path="/student/results" element={<StudentResults />} />
+                <Route path="/admin/users" element={<ProtectedRoute allowedRoles={['admin']}><AdminUsers /></ProtectedRoute>} />
 
-                                {/* Fallback for authenticated users */}
-                                <Route path="*" element={<Navigate to={getHomeRoute()} replace />} />
-                            </Routes>
-                        </AppLayout>
-                    </ProtectedRoute>
-                } />
+                <Route path="/admin/exams" element={<ProtectedRoute allowedRoles={['admin']}><AdminExams /></ProtectedRoute>} />
+
+                {/* Teacher */}
+
+                <Route path="/teacher" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherDashboard /></ProtectedRoute>} />
+
+                <Route path="/teacher/students" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherStudents /></ProtectedRoute>} />
+
+                <Route path="/teacher/create-exam" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherCreateExam /></ProtectedRoute>} />
+
+                <Route path="/teacher/exams/:examId/answers" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherReviewAnswers /></ProtectedRoute>} />
+
+                <Route path="/teacher/exams/:examId/results" element={<ProtectedRoute allowedRoles={['teacher']}><TeacherResults /></ProtectedRoute>} />
+
+                {/* Student */}
+
+                <Route path="/student" element={<ProtectedRoute allowedRoles={['student']}><StudentDashboard /></ProtectedRoute>} />
+
+                <Route path="/student/exam/:examId" element={<ProtectedRoute allowedRoles={['student']}><StudentTakeExam /></ProtectedRoute>} />
+
+                <Route path="/student/results" element={<ProtectedRoute allowedRoles={['student']}><StudentResults /></ProtectedRoute>} />
+
+                {/* Default */}
+
+                <Route path="*" element={<Navigate to={getHomeRoute()} replace />} />
+
             </Routes>
+
         </AnimatePresence>
+
     )
+
 }
