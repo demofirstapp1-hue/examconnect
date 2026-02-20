@@ -857,3 +857,52 @@ h4 { font-size: 1.125rem; }
   background-size: 200% 200%;
   animation: gradient-shift 3s ease infinite;
 }
+
+/* Sidebar base styles update */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background: var(--sidebar-bg); /* Use your existing background variable */
+  padding: 1.5rem 1rem;
+  z-index: 100;
+}
+
+/* The toggle button positioned at the top right of the sidebar */
+.toggle-btn {
+  position: absolute;
+  right: -12px;
+  top: 25px;
+  width: 24px;
+  height: 24px;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  z-index: 101;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+.sidebar.collapsed .nav-icon {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  min-height: 40px;
+}
